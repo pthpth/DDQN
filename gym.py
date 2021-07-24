@@ -37,7 +37,24 @@ class Gym:
         return inputs
 
     def done(self):
-
+        DIR = self.MAIN_DIR
+        x0 = self.X
+        y0 = self.Y
+        wid = self.width
+        hgt = self.height
+        ROT_MAT = np.array([
+            [math.cos(DIR), -math.sin(DIR)],
+            [math.sin(DIR), math.cos(DIR)]
+        ])
+        top_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 + hgt / 2]])
+        bottom_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 - hgt / 2]])
+        top_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 + hgt / 2]])
+        bottom_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 - hgt / 2]])
+        dir1 = bottom_right - top_right
+        dir2 = bottom_left - bottom_right
+        dir3 = top_left - bottom_left
+        dir4 = top_right - top_left
+        print(dir1,dir2,dir3,dir4)
         pass
 
     def step(self, step_number):
