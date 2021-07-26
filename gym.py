@@ -13,6 +13,10 @@ def minDist(arr):
 NAME_TRACK = "test.png"
 
 
+def unitVector(x):
+    return x / np.linalg.norm(x)
+
+
 # gym class to make the gym environment for Q-learning
 class Gym:
     def __init__(self, dirt, x, y):
@@ -46,16 +50,31 @@ class Gym:
             [math.cos(DIR), -math.sin(DIR)],
             [math.sin(DIR), math.cos(DIR)]
         ])
-        top_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 + hgt / 2]])
-        bottom_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 - hgt / 2]])
-        top_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 + hgt / 2]])
-        bottom_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 - hgt / 2]])
-        dir1 = bottom_right - top_right
-        dir2 = bottom_left - bottom_right
-        dir3 = top_left - bottom_left
-        dir4 = top_right - top_left
-        print(dir1,dir2,dir3,dir4)
-        pass
+        top_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 + hgt / 2]]).ravel()
+        bottom_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 - hgt / 2]]).ravel()
+        top_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 + hgt / 2]]).ravel()
+        bottom_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 - hgt / 2]]).ravel()
+        dir1 = unitVector(bottom_right - top_right)
+        dir1 = Point(dir1[0], dir1[1])
+        dir2 = unitVector(bottom_left - bottom_right)
+        dir2 = Point(dir2[0], dir2[1])
+        dir3 = unitVector(top_left - bottom_left)
+        dir3 = Point(dir3[0], dir3[1])
+        dir4 = unitVector(top_right - top_left)
+        dir4 = Point(dir4[0], dir4[1])
+        top_right = Point(top_right[0], top_right[1])
+        bottom_left = Point(bottom_left[0], bottom_left[1])
+        bottom_right = Point(bottom_right[0], bottom_right[1])
+        top_left = Point(top_left[0], top_left[1])
+        tracks = [(Point(-10, -10), Point(10, 10))]
+        for x in tracks:
+            if (pointOfIntersection(top_right, dir1, x[0], x[1]) < hgt or
+                    pointOfIntersection(bottom_right, dir2, x[0], x[1]) < wid or
+                    pointOfIntersection(bottom_left, dir3, x[0], x[1]) < hgt or
+                    pointOfIntersection(top_left, dir4, x[0], x[1]) < wid):
+                return True
+            else:
+                return False
 
     def step(self, step_number):
         if step_number == 0:
