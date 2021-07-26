@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 as cv
+from collison import Point
 
 
 def track_maker(name):
@@ -14,7 +15,7 @@ def track_maker(name):
     lines2 = []
     for line in lines:
         x1, y1, x2, y2 = line[0]
-        lines2.append([x1, y1, x2, y2])
+        lines2.append([Point(x1, y1), Point(x2, y2)])
         cv.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
         cv.imwrite('track.jpg', img)
     return lines2
@@ -32,7 +33,7 @@ def reward_lines(name):
     lines2 = []
     for line in lines:
         x1, y1, x2, y2 = line[0]
-        lines2.append([x1, y1, x2, y2])
+        lines2.append([Point(x1, y1), Point(x2, y2)])
         cv.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
         cv.imwrite('reward.jpg', img)
     return lines2

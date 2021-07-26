@@ -66,7 +66,7 @@ class Gym:
         bottom_left = Point(bottom_left[0], bottom_left[1])
         bottom_right = Point(bottom_right[0], bottom_right[1])
         top_left = Point(top_left[0], top_left[1])
-        tracks = [(Point(-10, -10), Point(10, 10))]
+        tracks = self.tracks
         for x in tracks:
             if (pointOfIntersection(top_right, dir1, x[0], x[1]) < hgt or
                     pointOfIntersection(bottom_right, dir2, x[0], x[1]) < wid or
@@ -90,3 +90,39 @@ class Gym:
         elif step_number == 5:
             self.MAIN_DIR -= 0.0001
         # return self.input_generator(), reward(), self.done()
+
+    def reward(self):
+        DIR = self.MAIN_DIR
+        x0 = self.X
+        y0 = self.Y
+        wid = self.width
+        hgt = self.height
+        ROT_MAT = np.array([
+            [math.cos(DIR), -math.sin(DIR)],
+            [math.sin(DIR), math.cos(DIR)]
+        ])
+        top_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 + hgt / 2]]).ravel()
+        bottom_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 - hgt / 2]]).ravel()
+        top_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 + hgt / 2]]).ravel()
+        bottom_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 - hgt / 2]]).ravel()
+        dir1 = unitVector(bottom_right - top_right)
+        dir1 = Point(dir1[0], dir1[1])
+        dir2 = unitVector(bottom_left - bottom_right)
+        dir2 = Point(dir2[0], dir2[1])
+        dir3 = unitVector(top_left - bottom_left)
+        dir3 = Point(dir3[0], dir3[1])
+        dir4 = unitVector(top_right - top_left)
+        dir4 = Point(dir4[0], dir4[1])
+        top_right = Point(top_right[0], top_right[1])
+        bottom_left = Point(bottom_left[0], bottom_left[1])
+        bottom_right = Point(bottom_right[0], bottom_right[1])
+        top_left = Point(top_left[0], top_left[1])
+        tracks = self.rewards
+        for x in tracks:
+            if (pointOfIntersection(top_right, dir1, x[0], x[1]) < hgt or
+                    pointOfIntersection(bottom_right, dir2, x[0], x[1]) < wid or
+                    pointOfIntersection(bottom_left, dir3, x[0], x[1]) < hgt or
+                    pointOfIntersection(top_left, dir4, x[0], x[1]) < wid):
+                return 1000
+            else:
+                return 0
