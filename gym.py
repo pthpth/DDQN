@@ -19,20 +19,19 @@ def unitVector(x):
 
 # gym class to make the gym environment for Q-learning
 class Gym:
-    def __init__(self, dirt, x, y):
-        self.MAIN_DIR = dirt
-        self.X = x
+    def __init__(self):
+        self.MAIN_DIR = 0
+        self.X = 0
         self.tracks = track_maker(NAME_TRACK)
         self.rewards = reward_lines(NAME_TRACK)
         self.width = 10
         self.height = 10
-        self.Y = y
-        self.track_points = [[Point(x[0], x[1]), Point(x[2], x[3])] for x in self.tracks]
+        self.Y = 0
 
     def input_generator(self):
         inputs = []
         origin = Point(self.X, self.Y)
-        tracks = self.track_points
+        tracks = self.tracks
         dirs = [math.pi / 4, -math.pi / 4, math.pi, 0, math.pi / 2]
         dirs = [Point(math.cos(x + self.MAIN_DIR), math.sin(x + self.MAIN_DIR)) for x in dirs]
         for dir in dirs:
@@ -68,10 +67,15 @@ class Gym:
         top_left = Point(top_left[0], top_left[1])
         tracks = self.tracks
         for x in tracks:
-            if (pointOfIntersection(top_right, dir1, x[0], x[1]) < hgt or
-                    pointOfIntersection(bottom_right, dir2, x[0], x[1]) < wid or
-                    pointOfIntersection(bottom_left, dir3, x[0], x[1]) < hgt or
-                    pointOfIntersection(top_left, dir4, x[0], x[1]) < wid):
+            temp1 = pointOfIntersection(top_right, dir1, x[0], x[1])
+            temp2 = pointOfIntersection(bottom_right, dir2, x[0], x[1])
+            temp3 = pointOfIntersection(bottom_left, dir3, x[0], x[1])
+            temp4 = pointOfIntersection(top_left, dir4, x[0], x[1])
+            if ((temp1 is not None and temp1 <= hgt) or
+                    (temp2 is not None and temp2 <= wid) or
+                    (temp3 is not None and temp3 <= hgt) or
+                    (temp4 is not None and temp4 <= wid)
+            ):
                 return True
             else:
                 return False
@@ -89,7 +93,7 @@ class Gym:
             self.MAIN_DIR += 0.0001
         elif step_number == 5:
             self.MAIN_DIR -= 0.0001
-        # return self.input_generator(), reward(), self.done()
+        return self.input_generator(), self.reward(), self.done()
 
     def reward(self):
         DIR = self.MAIN_DIR
@@ -119,10 +123,15 @@ class Gym:
         top_left = Point(top_left[0], top_left[1])
         tracks = self.rewards
         for x in tracks:
-            if (pointOfIntersection(top_right, dir1, x[0], x[1]) < hgt or
-                    pointOfIntersection(bottom_right, dir2, x[0], x[1]) < wid or
-                    pointOfIntersection(bottom_left, dir3, x[0], x[1]) < hgt or
-                    pointOfIntersection(top_left, dir4, x[0], x[1]) < wid):
+            temp1 = pointOfIntersection(top_right, dir1, x[0], x[1])
+            temp2 = pointOfIntersection(bottom_right, dir2, x[0], x[1])
+            temp3 = pointOfIntersection(bottom_left, dir3, x[0], x[1])
+            temp4 = pointOfIntersection(top_left, dir4, x[0], x[1])
+            if ((temp1 is not None and temp1 <= hgt) or
+                    (temp2 is not None and temp2 <= wid) or
+                    (temp3 is not None and temp3 <= hgt) or
+                    (temp4 is not None and temp4 <= wid)
+            ):
                 return 1000
             else:
                 return 0

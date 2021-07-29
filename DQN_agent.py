@@ -3,7 +3,7 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 
-import gym
+from gym import Gym
 
 
 class DQNAgent:
@@ -18,7 +18,7 @@ class DQNAgent:
         self.gamma = 0.99
         self.exploration_proba = 1.0
         self.exploration_proba_decay = 0.005
-        self.batch_size = 32
+        self.batch_size = 2
 
         # We define our memory buffer where we will store our experiences
         # We stores only the 2000 last time steps
@@ -78,25 +78,25 @@ class DQNAgent:
         # We iterate over the selected experiences
         for experience in batch_sample:
             # We compute the Q-values of S_t
-            q_current_state = self.model.predict(experience["current_state"])
+            q_current_state = self.model.predict(np.asarray(experience["current_state"]).astype(np.float32))
             # We compute the Q-target using Bellman optimality equation
             q_target = experience["reward"]
             if not experience["done"]:
-                q_target = q_target + self.gamma * np.max(self.model.predict(experience["next_state"])[0])
+                q_target = q_target + self.gamma * np.max(self.model.predict(np.asarray(experience["next_state"]).astype(np.float32))[0])
             q_current_state[0][experience["action"]] = q_target
             # train the model
             self.model.fit(experience["current_state"], q_current_state, verbose=0)
 
 
 # We create our gym environment
-env = gym.make("CartPole-v1")
+env = Gym()
 # We get the shape of a state and the actions space size
-state_size = env.observation_space.shape[0]
-action_size = env.action_space.n
+state_size = 5
+action_size = 6
 # Number of episodes to run
-n_episodes = 400
+n_episodes = 4
 # Max iterations per episode
-max_iteration_ep = 500
+max_iteration_ep = 5
 # We define our agent
 agent = DQNAgent(state_size, action_size)
 total_steps = 0
@@ -105,15 +105,17 @@ total_steps = 0
 for e in range(n_episodes):
     # We initialize the first state and reshape it to fit
     #  with the input layer of the DNN
-    current_state = env.reset()
-    current_state = np.array([current_state])
+    env = Gym()
+    current_state = env.input_generator()
+    current_state = np.asarray([current_state]).astype(np.float32)
+    print(current_state.shape)
     for step in range(max_iteration_ep):
         total_steps = total_steps + 1
         # the agent computes the action to perform
         action = agent.compute_action(current_state)
         # the environment runs the action and returns
         # the next state, a reward and whether the agent is done
-        next_state, reward, done, _ = env.step(action)
+        next_state, reward, done = env.step(action)
         next_state = np.array([next_state])
 
         # We store each experience in the memory buffer
@@ -128,6 +130,5 @@ for e in range(n_episodes):
     # if the have at least batch_size experiences in the memory buffer
     # than we tain our model
     if total_steps >= agent.batch_size:
+        print("OLA")
         agent.train()
-
-
