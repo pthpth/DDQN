@@ -37,6 +37,3 @@ def reward_lines(name):
         cv.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
         cv.imwrite('reward.jpg', img)
     return lines2
-
-track_maker("test.png")
-reward_lines("test.png")
