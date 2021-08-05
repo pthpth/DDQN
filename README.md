@@ -12,7 +12,7 @@
 User can change the tracks used to train the agent by drawing the desired map in paint and using specific colours to draw track lines and checkpoints
 ![test.png](test.png)
 Colors used:
-- for tracks: #5AFFFF
+- for tracks: #00FFFF
 - for reward checkpoints: EB1FEB
 
 Change the filename in TRACK_NAME variable in gym.py to the file name
