@@ -22,12 +22,11 @@ class Gym:
     def __init__(self):
         self.MAIN_DIR = 0
         self.X = 0
-        self.tracks = track_maker(NAME_TRACK)
-        self.rewards = reward_lines(NAME_TRACK)
+        self.tracks, self.tracks_lines = track_maker(NAME_TRACK)
+        self.rewards, self.reward_lines = reward_lines(NAME_TRACK)
         self.width = 10
         self.height = 10
         self.Y = 0
-
     def input_generator(self):
         inputs = []
         origin = Point(self.X, self.Y)
@@ -82,17 +81,17 @@ class Gym:
 
     def step(self, step_number):
         if step_number == 0:
-            self.X += 0.005
+            self.X += 2*math.cos(self.MAIN_DIR)
         elif step_number == 1:
-            self.Y += 0.005
+            self.Y += 2*math.sin(self.MAIN_DIR)
         elif step_number == 2:
-            self.X -= 0.005
+            self.X -= 2*math.cos(self.MAIN_DIR)
         elif step_number == 3:
-            self.Y -= 0.005
+            self.Y -= 2*math.sin(self.MAIN_DIR)
         elif step_number == 4:
-            self.MAIN_DIR += 0.0001
+            self.MAIN_DIR += math.pi/360
         elif step_number == 5:
-            self.MAIN_DIR -= 0.0001
+            self.MAIN_DIR -= math.pi/360
         return self.input_generator(), self.reward(), self.done()
 
     def reward(self):

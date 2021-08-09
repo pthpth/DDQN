@@ -59,10 +59,10 @@ class DQNAgent:
     def store_episode(self, current_state, action, reward, next_state, done):
         # We use a dictionary to store them
         self.memory_buffer.append({
-            "current_state": current_state,
+            "current_state": np.asarray(current_state).astype(np.float32),
             "action": action,
             "reward": reward,
-            "next_state": next_state,
+            "next_state":np.asarray(next_state).astype(np.float32),
             "done": done
         })
         # If the size of memory buffer exceeds its maximum, we remove the oldest experience
@@ -78,11 +78,11 @@ class DQNAgent:
         # We iterate over the selected experiences
         for experience in batch_sample:
             # We compute the Q-values of S_t
-            q_current_state = self.model.predict(np.asarray(experience["current_state"]).astype(np.float32))
+            q_current_state = self.model.predict(experience["current_state"])
             # We compute the Q-target using Bellman optimality equation
             q_target = experience["reward"]
             if not experience["done"]:
-                q_target = q_target + self.gamma * np.max(self.model.predict(np.asarray(experience["next_state"]).astype(np.float32))[0])
+                q_target = q_target + self.gamma * np.max(self.model.predict(experience["next_state"])[0])
             q_current_state[0][experience["action"]] = q_target
             # train the model
             self.model.fit(experience["current_state"], q_current_state, verbose=0)
