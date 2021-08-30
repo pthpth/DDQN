@@ -62,7 +62,7 @@ class DQNAgent:
             "current_state": np.asarray(current_state).astype(np.float32),
             "action": action,
             "reward": reward,
-            "next_state":np.asarray(next_state).astype(np.float32),
+            "next_state": np.asarray(next_state).astype(np.float32),
             "done": done
         })
         # If the size of memory buffer exceeds its maximum, we remove the oldest experience
@@ -94,9 +94,7 @@ env = Gym()
 state_size = 5
 action_size = 6
 # Number of episodes to run
-n_episodes = 4
-# Max iterations per episode
-max_iteration_ep = 5
+n_episodes = 1000
 # We define our agent
 agent = DQNAgent(state_size, action_size)
 total_steps = 0
@@ -108,27 +106,26 @@ for e in range(n_episodes):
     env = Gym()
     current_state = env.input_generator()
     current_state = np.asarray([current_state]).astype(np.float32)
-    print(current_state.shape)
-    for step in range(max_iteration_ep):
-        total_steps = total_steps + 1
-        # the agent computes the action to perform
-        action = agent.compute_action(current_state)
-        # the environment runs the action and returns
-        # the next state, a reward and whether the agent is done
-        next_state, reward, done = env.step(action)
-        next_state = np.array([next_state])
 
-        # We store each experience in the memory buffer
-        agent.store_episode(current_state, action, reward, next_state, done)
+    total_steps = total_steps + 1
+    # the agent computes the action to perform
+    action = agent.compute_action(current_state)
+    # the environment runs the action and returns
+    # the next state, a reward and whether the agent is done
+    next_state, reward, done = env.step(action)
+    next_state = np.array([next_state])
 
-        # if the episode is ended, we leave the loop after
-        # updating the exploration probability
-        if done:
-            agent.update_exploration_probability()
-            break
-        current_state = next_state
+    # We store each experience in the memory buffer
+    agent.store_episode(current_state, action, reward, next_state, done)
+
+    # if the episode is ended, we leave the loop after
+    # updating the exploration probability
+    if done:
+        agent.update_exploration_probability()
+    current_state = next_state
     # if the have at least batch_size experiences in the memory buffer
-    # than we tain our model
+    # than we train our model
     if total_steps >= agent.batch_size:
-        print("OLA")
+        total_steps=0
+        print(e)
         agent.train()
