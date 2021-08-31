@@ -2,8 +2,9 @@ import numpy as np
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
-
 from gym import Gym
+import pyglet
+from opengltest import GamerTab
 
 
 class DQNAgent:
@@ -45,15 +46,16 @@ class DQNAgent:
         #     we forward the state through the DNN and choose the action 
         #     with the highest Q-value.
         if np.random.uniform(0, 1) < self.exploration_proba:
+            # print("random")
             return np.random.choice(range(self.n_actions))
-        q_values = self.model.predict(current_state)[0]
-        return np.argmax(q_values)
+        q_values = self.model.predict(current_state)
+        # print("highest")
+        return np.argmax(q_values[0])
 
     # when an episode is finished, we update the exploration probability using 
     # epsilon greedy algorithm
     def update_exploration_probability(self):
         self.exploration_proba = self.exploration_proba * np.exp(-self.exploration_proba_decay)
-        print(self.exploration_proba)
 
     # At each time step, we store the corresponding experience
     def store_episode(self, current_state, action, reward, next_state, done):
@@ -79,6 +81,7 @@ class DQNAgent:
         for experience in batch_sample:
             # We compute the Q-values of S_t
             q_current_state = self.model.predict(experience["current_state"])
+            # print("q",experience["current_state"])
             # We compute the Q-target using Bellman optimality equation
             q_target = experience["reward"]
             if not experience["done"]:
@@ -106,10 +109,10 @@ for e in range(n_episodes):
     env = Gym()
     current_state = env.input_generator()
     current_state = np.asarray([current_state]).astype(np.float32)
-
     total_steps = total_steps + 1
     # the agent computes the action to perform
     action = agent.compute_action(current_state)
+    # print(action)
     # the environment runs the action and returns
     # the next state, a reward and whether the agent is done
     next_state, reward, done = env.step(action)
@@ -126,6 +129,8 @@ for e in range(n_episodes):
     # if the have at least batch_size experiences in the memory buffer
     # than we train our model
     if total_steps >= agent.batch_size:
-        total_steps=0
-        print(e)
+        total_steps = 0
         agent.train()
+        print(e)
+        tester = GamerTab(agent.model,1350,629,"hello")
+        pyglet.app.run()

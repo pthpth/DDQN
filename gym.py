@@ -21,20 +21,31 @@ def unitVector(x):
 class Gym:
     def __init__(self):
         self.MAIN_DIR = 0
-        self.X = 0
+        self.X = 100
         self.tracks, self.tracks_lines = track_maker(NAME_TRACK)
         self.rewards, self.reward_lines = reward_lines(NAME_TRACK)
         self.width = 10
         self.height = 10
-        self.Y = 0
+        self.Y = 550
+
     def input_generator(self):
         inputs = []
         origin = Point(self.X, self.Y)
         tracks = self.tracks
-        dirs = [math.pi / 4, -math.pi / 4, math.pi, 0, math.pi / 2]
+        dirs = [math.pi / 4, -math.pi / 4, -math.pi / 2, 0, math.pi / 2]
         dirs = [Point(math.cos(x + self.MAIN_DIR), math.sin(x + self.MAIN_DIR)) for x in dirs]
+        # print("-------------------")
         for dir in dirs:
+            # print("UPPER DIR",dir.x,dir.y)
             dist = [pointOfIntersection(origin, dir, track[0], track[1]) for track in tracks]
+            x = 0
+            x = None
+            # for y in dist:
+            #     if x is None and y is not None:
+            #         x = y
+            # if x is None:
+                # print("SEE ABOVE")
+                # print(dist)
             inputs.append(minDist(dist))
         return inputs
 
@@ -76,22 +87,21 @@ class Gym:
                     (temp4 is not None and temp4 <= wid)
             ):
                 return True
-            else:
-                return False
+        return False
 
     def step(self, step_number):
         if step_number == 0:
-            self.X += 2*math.cos(self.MAIN_DIR)
+            self.X += 2 * math.cos(self.MAIN_DIR)
         elif step_number == 1:
-            self.Y += 2*math.sin(self.MAIN_DIR)
+            self.Y += 2 * math.sin(self.MAIN_DIR)
         elif step_number == 2:
-            self.X -= 2*math.cos(self.MAIN_DIR)
+            self.X -= 2 * math.cos(self.MAIN_DIR)
         elif step_number == 3:
-            self.Y -= 2*math.sin(self.MAIN_DIR)
+            self.Y -= 2 * math.sin(self.MAIN_DIR)
         elif step_number == 4:
-            self.MAIN_DIR += math.pi/360
+            self.MAIN_DIR += math.pi / 360
         elif step_number == 5:
-            self.MAIN_DIR -= math.pi/360
+            self.MAIN_DIR -= math.pi / 360
         return self.input_generator(), self.reward(), self.done()
 
     def reward(self):
@@ -132,5 +142,4 @@ class Gym:
                     (temp4 is not None and temp4 <= wid)
             ):
                 return 1000
-            else:
-                return 0
+        return 0
