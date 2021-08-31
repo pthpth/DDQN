@@ -16,8 +16,8 @@ def track_maker(name):
     lines3 = []
     for line in lines:
         x1, y1, x2, y2 = line[0]
-        lines2.append([Point(x1, y1), Point(x2, y2)])
-        lines3.append([(x1, y1), (x2, y2)])
+        lines2.append([Point(x1, 629-y1), Point(x2, 629-y2)])
+        lines3.append([(x1, 629-y1), (x2, 629-y2)])
         cv.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
         cv.imwrite('track.jpg', img)
     return (lines2, lines3)
@@ -36,8 +36,8 @@ def reward_lines(name):
     lines3 = []
     for line in lines:
         x1, y1, x2, y2 = line[0]
-        lines2.append([Point(x1, y1), Point(x2, y2)])
-        lines3.append([(x1, y1), (x2, y2)])
+        lines2.append([Point(x1, 629-y1), Point(x2, 629-y2)])
+        lines3.append([(x1, 629-y1), (x2, 629-y2)])
         cv.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
         cv.imwrite('reward.jpg', img)
     return (lines2, lines3)

@@ -25,10 +25,18 @@ def pointOfIntersection(origin, direction, point1, point2):
     v3 = Point(-direction.y, direction.x)
 
     dot_product = dot(v2, v3)
-    if abs(dot_product) < 0.000001:
+    # print("v2", v2.x, v2.y, "v3", v3.x, v3.y)
+    # print("origin", origin.x, origin.y)
+    # print("dir", direction.x, direction.y)
+    # print("Point1", point1.x, point1.y)
+    # print("Point2", point2.x, point2.y)
+    if abs(dot_product) < 1e-15:
+        # print("NONE")
+        # print(dot_product)
         return None
     t1 = cross(v2, v1) / dot_product
     t2 = dot(v1, v3) / dot_product
-
+    # print("cross",t1)
     if t1 > 0 and (0 <= t2 <= 1):
         return t1
+    # print("HIIII")
