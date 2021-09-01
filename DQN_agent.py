@@ -15,11 +15,11 @@ class DQNAgent:
         # "gamma": discounted factor
         # "exploration_proba_decay": decay of the exploration probability
         # "batch_size": size of experiences we sample to train the DNN
-        self.lr = 0.001
+        self.lr = 0.005
         self.gamma = 0.99
-        self.exploration_proba = 1.0
+        self.exploration_proba = 0.8
         self.exploration_proba_decay = 0.005
-        self.batch_size = 2
+        self.batch_size = 4
 
         # We define our memory buffer where we will store our experiences
         # We stores only the 2000 last time steps
@@ -84,10 +84,13 @@ class DQNAgent:
             # print("q",experience["current_state"])
             # We compute the Q-target using Bellman optimality equation
             q_target = experience["reward"]
+            print("nextstate",experience["next_state"])
             if not experience["done"]:
                 q_target = q_target + self.gamma * np.max(self.model.predict(experience["next_state"])[0])
+                print("q_target",q_target)
             q_current_state[0][experience["action"]] = q_target
             # train the model
+            print("q_current",q_current_state)
             self.model.fit(experience["current_state"], q_current_state, verbose=0)
 
 
@@ -95,35 +98,39 @@ class DQNAgent:
 env = Gym()
 # We get the shape of a state and the actions space size
 state_size = 5
-action_size = 6
+action_size = 4
 # Number of episodes to run
-n_episodes = 1000
+n_episodes = 10000
+runner = 0
 # We define our agent
 agent = DQNAgent(state_size, action_size)
+# print(print(agent.model.layers[0].get_weights()[0]))
 total_steps = 0
-
 # We iterate over episodes
 for e in range(n_episodes):
     # We initialize the first state and reshape it to fit
     #  with the input layer of the DNN
-    env = Gym()
     current_state = env.input_generator()
     current_state = np.asarray([current_state]).astype(np.float32)
     total_steps = total_steps + 1
+    runner += 1
     # the agent computes the action to perform
     action = agent.compute_action(current_state)
     # print(action)
     # the environment runs the action and returns
     # the next state, a reward and whether the agent is done
     next_state, reward, done = env.step(action)
+    # print(env.X, env.Y, env.MAIN_DIR)
     next_state = np.array([next_state])
-
+    # print("state",next_state)
     # We store each experience in the memory buffer
     agent.store_episode(current_state, action, reward, next_state, done)
 
     # if the episode is ended, we leave the loop after
     # updating the exploration probability
     if done:
+        env = Gym()
+        next_state = env.input_generator()
         agent.update_exploration_probability()
     current_state = next_state
     # if the have at least batch_size experiences in the memory buffer
@@ -131,6 +138,8 @@ for e in range(n_episodes):
     if total_steps >= agent.batch_size:
         total_steps = 0
         agent.train()
-        print(e)
-        tester = GamerTab(agent.model,1350,629,"hello")
-        pyglet.app.run()
+        print("weights", agent.model.layers[0].get_weights()[0])
+    if runner % 100 == 0:
+        runner = 0
+        # tester = GamerTab(agent.model, 1350, 629, "hello")
+        # pyglet.app.run()

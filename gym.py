@@ -21,12 +21,12 @@ def unitVector(x):
 class Gym:
     def __init__(self):
         self.MAIN_DIR = 0
-        self.X = 100
+        self.X = 70
         self.tracks, self.tracks_lines = track_maker(NAME_TRACK)
         self.rewards, self.reward_lines = reward_lines(NAME_TRACK)
-        self.width = 10
-        self.height = 10
-        self.Y = 550
+        self.width = 40
+        self.height = 20
+        self.Y = 300
 
     def input_generator(self):
         inputs = []
@@ -44,9 +44,10 @@ class Gym:
             #     if x is None and y is not None:
             #         x = y
             # if x is None:
-                # print("SEE ABOVE")
-                # print(dist)
+            # print("SEE ABOVE")
+            # print(dist)
             inputs.append(minDist(dist))
+        print(inputs)
         return inputs
 
     def done(self):
@@ -90,19 +91,25 @@ class Gym:
         return False
 
     def step(self, step_number):
+        # print(step_number)
         if step_number == 0:
-            self.X += 2 * math.cos(self.MAIN_DIR)
+            self.X += 1 * math.cos(self.MAIN_DIR)
+            self.Y += 1 * math.sin(self.MAIN_DIR)
+        # elif step_number == 1:
+        #     self.X -= 2 * math.sin(self.MAIN_DIR)
+        #     self.Y += 2 * math.cos(self.MAIN_DIR)
         elif step_number == 1:
-            self.Y += 2 * math.sin(self.MAIN_DIR)
+            self.X -= 1 * math.cos(self.MAIN_DIR)
+            self.Y -= 1 * math.sin(self.MAIN_DIR)
+        # elif step_number == 3:
+        #     self.X += 2 * math.sin(self.MAIN_DIR)
+        #     self.Y -= 2 * math.cos(self.MAIN_DIR)
         elif step_number == 2:
-            self.X -= 2 * math.cos(self.MAIN_DIR)
+            self.MAIN_DIR += math.pi / 6
         elif step_number == 3:
-            self.Y -= 2 * math.sin(self.MAIN_DIR)
-        elif step_number == 4:
-            self.MAIN_DIR += math.pi / 360
-        elif step_number == 5:
-            self.MAIN_DIR -= math.pi / 360
-        return self.input_generator(), self.reward(), self.done()
+            self.MAIN_DIR -= math.pi / 6
+
+        return self.input_generator(), self.reward(),self.done()
 
     def reward(self):
         DIR = self.MAIN_DIR

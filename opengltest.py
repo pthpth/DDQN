@@ -10,15 +10,16 @@ class GamerTab(pyglet.window.Window):
     def __init__(self, bren, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.bren = bren
-        pyglet.clock.schedule_interval(self.update, 1 / 120.0)
+        pyglet.clock.schedule_interval(self.update, 1 / 24.0)
         self.env = gym.Gym()
+        self.set_vsync(True)
         self.current_state = self.env.input_generator()
         self.current_state = np.asarray([self.current_state]).astype('float32')
         self.batch = pyglet.graphics.Batch()
         self.cars = pyglet.graphics.Batch()
         self.lines = track_maker("test.png")[1]
         self.reward = reward_lines("test.png")[1]
-        self.car = shapes.Rectangle(0, 10, height=10, width=10, batch=self.cars)
+        self.car = shapes.Rectangle(0, 10, height=20, width=40, batch=self.cars)
         self.d_lines = [
             shapes.Line(x[0][0],x[0][1], x[1][0], x[1][1], 2, color=(50, 225, 30), batch=self.batch)
             for
@@ -40,11 +41,12 @@ class GamerTab(pyglet.window.Window):
     def update(self, dt):
         q_values = self.bren.predict(self.current_state)[0]
         action = np.argmax(q_values)
-        print(q_values)
+        print("TABstate",self.current_state)
+        print("TABq",q_values)
         self.current_state, reward, done = self.env.step(action)
         if done:
             # print("DONE")
             self.close()
         self.current_state = np.asarray([self.current_state]).astype('float32')
-        self.car.rotation = self.env.MAIN_DIR
+        self.car.rotation = self.env.MAIN_DIR*180/math.pi
         self.car.position = (self.env.X, self.env.Y)
