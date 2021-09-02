@@ -1,16 +1,13 @@
-from collison import *
-from stack import *
+import numpy as np
+import math
 
 
-def minDist(arr):
-    mins = None
-    for x in arr:
-        if (mins is None) or (x is not None and mins > x):
-            mins = x
-    return mins
+def dot(a, b):
+    return a[0] * b[0] + a[1] * b[1]
 
 
-NAME_TRACK = "test.png"
+def cross(a, b):
+    return a[0] * b[1] - a[1] * b[0]
 
 
 def unitVector(x):
@@ -22,73 +19,96 @@ class Gym:
     def __init__(self):
         self.MAIN_DIR = 0
         self.X = 70
-        self.tracks, self.tracks_lines = track_maker(NAME_TRACK)
-        self.rewards, self.reward_lines = reward_lines(NAME_TRACK)
+        # self.tracks, self.tracks_lines = track_maker(NAME_TRACK)
+        # self.rewards, self.reward_lines = reward_lines(NAME_TRACK)
         self.width = 40
         self.height = 20
         self.Y = 300
 
-    def input_generator(self):
+    def input_generator(q):
+        points1 = [[-200, 200], [200, 200], [-200, 200], [-200, -200], [-100, 100], [100, 100], [-100, 100],
+                   [-100, -100]]
+        points2 = [[-200, -200], [200, -200], [200, 200], [200, -200], [-100, -100], [100, -100], [100, 100],
+                   [100, -100]]
+        directions = [[math.cos(math.radians(180)), math.sin(math.radians(180))],
+                      [math.cos(math.radians(0)), math.sin(math.radians(0))],
+                      [math.cos(math.radians(-90)), math.sin(math.radians(-90))],
+                      [math.cos(math.radians(90)), math.sin(math.radians(90))],
+                      [math.cos(math.radians(135)), math.sin(math.radians(135))],
+                      [math.cos(math.radians(45)), math.sin(math.radians(45))]]
         inputs = []
-        origin = Point(self.X, self.Y)
-        tracks = self.tracks
-        dirs = [math.pi / 4, -math.pi / 4, -math.pi / 2, 0, math.pi / 2]
-        dirs = [Point(math.cos(x + self.MAIN_DIR), math.sin(x + self.MAIN_DIR)) for x in dirs]
-        # print("-------------------")
-        for dir in dirs:
-            # print("UPPER DIR",dir.x,dir.y)
-            dist = [pointOfIntersection(origin, dir, track[0], track[1]) for track in tracks]
-            x = 0
-            x = None
-            # for y in dist:
-            #     if x is None and y is not None:
-            #         x = y
-            # if x is None:
-            # print("SEE ABOVE")
-            # print(dist)
-            inputs.append(minDist(dist))
-        print(inputs)
+        for direction in directions:
+            final_l = []
+            for p, d in zip(points1, points2):
+                r = [d[0] - p[0], d[1] - p[1]]
+                s = direction
+                c = [q[0] - p[0], q[1] - p[1]]
+                if cross(r, s) == 0 and cross(c, r) == 0:
+                    final_l.append(math.sqrt(dot(c, c)))
+                    # t0=dot(c,r)/dot(r,r)
+                    # t1=t0+dot(s,r)/dot(r,r)
+                    # if(dot(s,r)<0):
+                    #     if 0<=t1<=t0<=1:
+                    #         final_l.append((True,1))
+                    #     else:
+                    #         final_l.append((False,1))
+                    # else:
+                    #     if 0<=t0<=t1<=1:
+                    #         final_l.append()
+                    #     # else:
+                    #     #     final_l.append((False,2))
+                elif cross(r, s) == 0 and cross(c, r) != 0:
+                    continue
+                    # final_l.append((False,3))
+                else:
+                    t = cross(c, s) / cross(r, s)
+                    u = cross(c, r) / cross(r, s)
+                    if 0 < t < 1 and 0 < u:
+                        final_l.append(u)
+                        # final_l.append((False,4))
+            inputs.append(min(final_l))
+        # print(inputs)
         return inputs
 
-    def done(self):
-        DIR = self.MAIN_DIR
-        x0 = self.X
-        y0 = self.Y
-        wid = self.width
-        hgt = self.height
-        ROT_MAT = np.array([
-            [math.cos(DIR), -math.sin(DIR)],
-            [math.sin(DIR), math.cos(DIR)]
-        ])
-        top_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 + hgt / 2]]).ravel()
-        bottom_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 - hgt / 2]]).ravel()
-        top_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 + hgt / 2]]).ravel()
-        bottom_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 - hgt / 2]]).ravel()
-        dir1 = unitVector(bottom_right - top_right)
-        dir1 = Point(dir1[0], dir1[1])
-        dir2 = unitVector(bottom_left - bottom_right)
-        dir2 = Point(dir2[0], dir2[1])
-        dir3 = unitVector(top_left - bottom_left)
-        dir3 = Point(dir3[0], dir3[1])
-        dir4 = unitVector(top_right - top_left)
-        dir4 = Point(dir4[0], dir4[1])
-        top_right = Point(top_right[0], top_right[1])
-        bottom_left = Point(bottom_left[0], bottom_left[1])
-        bottom_right = Point(bottom_right[0], bottom_right[1])
-        top_left = Point(top_left[0], top_left[1])
-        tracks = self.tracks
-        for x in tracks:
-            temp1 = pointOfIntersection(top_right, dir1, x[0], x[1])
-            temp2 = pointOfIntersection(bottom_right, dir2, x[0], x[1])
-            temp3 = pointOfIntersection(bottom_left, dir3, x[0], x[1])
-            temp4 = pointOfIntersection(top_left, dir4, x[0], x[1])
-            if ((temp1 is not None and temp1 <= hgt) or
-                    (temp2 is not None and temp2 <= wid) or
-                    (temp3 is not None and temp3 <= hgt) or
-                    (temp4 is not None and temp4 <= wid)
-            ):
-                return True
-        return False
+    # def done(self):
+    #     DIR = self.MAIN_DIR
+    #     x0 = self.X
+    #     y0 = self.Y
+    #     wid = self.width
+    #     hgt = self.height
+    #     ROT_MAT = np.array([
+    #         [math.cos(DIR), -math.sin(DIR)],
+    #         [math.sin(DIR), math.cos(DIR)]
+    #     ])
+    #     top_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 + hgt / 2]]).ravel()
+    #     bottom_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 - hgt / 2]]).ravel()
+    #     top_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 + hgt / 2]]).ravel()
+    #     bottom_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 - hgt / 2]]).ravel()
+    #     dir1 = unitVector(bottom_right - top_right)
+    #     dir1 = Point(dir1[0], dir1[1])
+    #     dir2 = unitVector(bottom_left - bottom_right)
+    #     dir2 = Point(dir2[0], dir2[1])
+    #     dir3 = unitVector(top_left - bottom_left)
+    #     dir3 = Point(dir3[0], dir3[1])
+    #     dir4 = unitVector(top_right - top_left)
+    #     dir4 = Point(dir4[0], dir4[1])
+    #     top_right = Point(top_right[0], top_right[1])
+    #     bottom_left = Point(bottom_left[0], bottom_left[1])
+    #     bottom_right = Point(bottom_right[0], bottom_right[1])
+    #     top_left = Point(top_left[0], top_left[1])
+    #     tracks = self.tracks
+    #     for x in tracks:
+    #         temp1 = pointOfIntersection(top_right, dir1, x[0], x[1])
+    #         temp2 = pointOfIntersection(bottom_right, dir2, x[0], x[1])
+    #         temp3 = pointOfIntersection(bottom_left, dir3, x[0], x[1])
+    #         temp4 = pointOfIntersection(top_left, dir4, x[0], x[1])
+    #         if ((temp1 is not None and temp1 <= hgt) or
+    #                 (temp2 is not None and temp2 <= wid) or
+    #                 (temp3 is not None and temp3 <= hgt) or
+    #                 (temp4 is not None and temp4 <= wid)
+    #         ):
+    #             return True
+    #     return False
 
     def step(self, step_number):
         # print(step_number)
@@ -109,7 +129,7 @@ class Gym:
         elif step_number == 3:
             self.MAIN_DIR -= math.pi / 6
 
-        return self.input_generator(), self.reward(),self.done()
+        return self.input_generator(), self.reward(), self.done()
 
     def reward(self):
         DIR = self.MAIN_DIR
