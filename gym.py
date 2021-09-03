@@ -14,22 +14,49 @@ def unitVector(x):
     return x / np.linalg.norm(x)
 
 
+def work(r, s, c):
+    inputs = False
+    if cross(r, s) == 0 and cross(c, r) == 0:
+        t0 = dot(c, r) / dot(r, r)
+        t1 = t0 + dot(s, r) / dot(r, r)
+        if dot(s, r) < 0:
+            if 0 <= t1 <= t0 <= 1:
+                inputs = inputs or True
+            else:
+                inputs = inputs or False
+        else:
+            if 0 <= t0 <= t1 <= 1:
+                inputs = inputs or True
+            else:
+                inputs = inputs or False
+    elif cross(r, s) == 0 and cross(c, r) != 0:
+        inputs = inputs or False
+    else:
+        t = cross(c, s) / cross(r, s)
+        u = cross(c, r) / cross(r, s)
+        if 0 < t < 1 and 0 < u:
+            inputs = inputs or True
+        else:
+            inputs = inputs or False
+    return inputs
+
+
 # gym class to make the gym environment for Q-learning
 class Gym:
     def __init__(self):
         self.MAIN_DIR = 0
         self.X = 70
-        # self.tracks, self.tracks_lines = track_maker(NAME_TRACK)
-        # self.rewards, self.reward_lines = reward_lines(NAME_TRACK)
+        self.points1 = [[-200, 200], [200, 200], [-200, 200], [-200, -200], [-100, 100], [100, 100], [-100, 100],
+                        [-100, -100]]
+        self.points2 = [[-200, -200], [200, -200], [200, 200], [200, -200], [-100, -100], [100, -100], [100, 100],
+                        [100, -100]]
         self.width = 40
         self.height = 20
         self.Y = 300
 
-    def input_generator(q):
-        points1 = [[-200, 200], [200, 200], [-200, 200], [-200, -200], [-100, 100], [100, 100], [-100, 100],
-                   [-100, -100]]
-        points2 = [[-200, -200], [200, -200], [200, 200], [200, -200], [-100, -100], [100, -100], [100, 100],
-                   [100, -100]]
+    def input_generator(self, q):
+        points1 = self.points1
+        points2 = self.points2
         directions = [[math.cos(math.radians(180)), math.sin(math.radians(180))],
                       [math.cos(math.radians(0)), math.sin(math.radians(0))],
                       [math.cos(math.radians(-90)), math.sin(math.radians(-90))],
@@ -70,45 +97,37 @@ class Gym:
         # print(inputs)
         return inputs
 
-    # def done(self):
-    #     DIR = self.MAIN_DIR
-    #     x0 = self.X
-    #     y0 = self.Y
-    #     wid = self.width
-    #     hgt = self.height
-    #     ROT_MAT = np.array([
-    #         [math.cos(DIR), -math.sin(DIR)],
-    #         [math.sin(DIR), math.cos(DIR)]
-    #     ])
-    #     top_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 + hgt / 2]]).ravel()
-    #     bottom_right = ROT_MAT @ np.array([[x0 + wid / 2], [y0 - hgt / 2]]).ravel()
-    #     top_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 + hgt / 2]]).ravel()
-    #     bottom_left = ROT_MAT @ np.array([[x0 - wid / 2], [y0 - hgt / 2]]).ravel()
-    #     dir1 = unitVector(bottom_right - top_right)
-    #     dir1 = Point(dir1[0], dir1[1])
-    #     dir2 = unitVector(bottom_left - bottom_right)
-    #     dir2 = Point(dir2[0], dir2[1])
-    #     dir3 = unitVector(top_left - bottom_left)
-    #     dir3 = Point(dir3[0], dir3[1])
-    #     dir4 = unitVector(top_right - top_left)
-    #     dir4 = Point(dir4[0], dir4[1])
-    #     top_right = Point(top_right[0], top_right[1])
-    #     bottom_left = Point(bottom_left[0], bottom_left[1])
-    #     bottom_right = Point(bottom_right[0], bottom_right[1])
-    #     top_left = Point(top_left[0], top_left[1])
-    #     tracks = self.tracks
-    #     for x in tracks:
-    #         temp1 = pointOfIntersection(top_right, dir1, x[0], x[1])
-    #         temp2 = pointOfIntersection(bottom_right, dir2, x[0], x[1])
-    #         temp3 = pointOfIntersection(bottom_left, dir3, x[0], x[1])
-    #         temp4 = pointOfIntersection(top_left, dir4, x[0], x[1])
-    #         if ((temp1 is not None and temp1 <= hgt) or
-    #                 (temp2 is not None and temp2 <= wid) or
-    #                 (temp3 is not None and temp3 <= hgt) or
-    #                 (temp4 is not None and temp4 <= wid)
-    #         ):
-    #             return True
-    #     return False
+    def done(self, q, rot):
+        points1 = self.points1
+        points2 = self.points2
+        rotate = [[math.cos(rot), math.sin(rot)], [-math.sin(rot), math.cos(rot)]]
+        points = [self.width / 2, self.width / 2, -self.width / 2, -self.width / 2], [self.height / 2, -self.height / 2,
+                                                                                      -self.height / 2, self.height / 2]
+        points = np.array(rotate) @ np.array(points)
+        points = points.T + np.array(q)
+        pair1 = (points[0], points[1])
+        pair2 = (points[1], points[2])
+        pair3 = (points[2], points[3])
+        pair4 = (points[3], points[0])
+        s0 = points[1] - points[0]
+        q0 = points[0]
+        s1 = points[2] - points[1]
+        q1 = points[1]
+        s2 = points[3] - points[2]
+        q2 = points[2]
+        s3 = points[0] - points[3]
+        q3 = points[3]
+        ans = False
+        for p, d in zip(points1, points2):
+            r = [d[0] - p[0], d[1] - p[1]]
+            c0 = [q0[0] - p[0], q0[1] - p[1]]
+            c1 = [q1[0] - p[0], q1[1] - p[1]]
+            c2 = [q2[0] - p[0], q2[1] - p[1]]
+            c3 = [q3[0] - p[0], q3[1] - p[1]]
+            ans = ans or work(r, s0, c0) or work(r, s1, c1) or work(r, s2, c2) or work(r, s3, c3)
+            if ans:
+                return ans
+        return False
 
     def step(self, step_number):
         # print(step_number)
