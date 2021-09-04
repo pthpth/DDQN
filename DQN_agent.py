@@ -84,20 +84,20 @@ class DQNAgent:
             # print("q",experience["current_state"])
             # We compute the Q-target using Bellman optimality equation
             q_target = experience["reward"]
-            print("nextstate",experience["next_state"])
+            # print("nextstate",experience["next_state"])
             if not experience["done"]:
                 q_target = q_target + self.gamma * np.max(self.model.predict(experience["next_state"])[0])
-                print("q_target",q_target)
+                # print("q_target",q_target)
             q_current_state[0][experience["action"]] = q_target
             # train the model
-            print("q_current",q_current_state)
+            # print("q_current",q_current_state)
             self.model.fit(experience["current_state"], q_current_state, verbose=0)
 
 
 # We create our gym environment
 env = Gym()
 # We get the shape of a state and the actions space size
-state_size = 5
+state_size = 6
 action_size = 4
 # Number of episodes to run
 n_episodes = 10000
@@ -138,8 +138,9 @@ for e in range(n_episodes):
     if total_steps >= agent.batch_size:
         total_steps = 0
         agent.train()
-        print("weights", agent.model.layers[0].get_weights()[0])
+        # print("weights", agent.model.layers[0].get_weights()[0])
     if runner % 100 == 0:
         runner = 0
-        # tester = GamerTab(agent.model, 1350, 629, "hello")
-        # pyglet.app.run()
+        tester = GamerTab(agent.model, 400, 400, "hello")
+        print("oi")
+        pyglet.app.run()
