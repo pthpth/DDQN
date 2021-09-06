@@ -1,18 +1,16 @@
-# importing pyglet module
 import math
 import gym
 import pyglet
 from pyglet import shapes
 import data
 import numpy as np
-from stack import *
 
 
 class GamerTab(pyglet.window.Window):
     def __init__(self, bren, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.bren = bren
-        pyglet.clock.schedule_interval(self.update, 1 / 24.0)
+        pyglet.clock.schedule_interval(self.update, 1 / 30.0)
         self.env = gym.Gym()
         self.set_vsync(True)
         self.current_state = self.env.input_generator()
@@ -32,11 +30,10 @@ class GamerTab(pyglet.window.Window):
             x
             in
             self.reward]
+        print("START")
 
     def on_draw(self):
-        # clear the window
         self.clear()
-        # draw the label
         self.batch.draw()
         self.cars.draw()
 
@@ -48,8 +45,7 @@ class GamerTab(pyglet.window.Window):
         self.current_state, reward, done = self.env.step(action)
         if done:
             print("DONE")
-            # print(self.env.X,self.env.Y,self.env.MAIN_DIR)
             self.close()
         self.current_state = np.asarray([self.current_state]).astype('float32')
-        self.car.rotation = self.env.MAIN_DIR * 180 / math.pi
         self.car.position = (self.env.X, self.env.Y)
+        self.car.rotation = self.env.dir_v * 180 / math.pi
