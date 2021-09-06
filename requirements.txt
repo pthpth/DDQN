@@ -1,3 +1,0 @@
-numpy~=1.19.5
-pyglet~=1.5.18
-tensorflow~=2.5.0
