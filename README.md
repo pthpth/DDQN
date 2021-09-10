@@ -2,9 +2,7 @@ This is a DDQN(Double Deep Q network) based project. The aim is avoiding collisi
 The environment is provided by [Highway-env](https://github.com/eleurent/highway-env)
 
 The "Highway-env-v0" is used.
-<!-- blank line -->
-<figure class="video_container">
-    <iframe src="https://www.youtube.com/embed/B5RNnlE-gw4"  allow="fullscreen"> </iframe>
-</figure>
 
-<!-- blank line -->
+
+https://user-images.githubusercontent.com/30886140/132837362-43bab12f-55e4-433f-8cb0-b589b2fcffb0.mp4
+
